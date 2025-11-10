@@ -69,15 +69,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
         <div className="min-h-screen bg-gradient-to-br from-rose-50 via-purple-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-sky-900 flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
-                    <div className="mb-4">
-                        <h1 className="font-logo text-6xl md:text-7xl font-bold text-slate-800 dark:text-white leading-none">
-                            Emb<span className="text-orange-500">.</span>
-                        </h1>
-                        <p className="font-logo text-xl md:text-2xl font-bold text-slate-800 dark:text-white tracking-[0.25em] mt-1">
-                            CHURCH
-                        </p>
-                    </div>
-                    <p className="mt-4 text-slate-600 dark:text-slate-300">
+                    <h1 className="text-5xl md:text-6xl font-bold text-slate-800 dark:text-white leading-tight">
+                        Realidade Futura
+                    </h1>
+                    <p className="mt-2 text-slate-500 dark:text-slate-400 text-sm">
+                        por <span className="font-logo font-bold tracking-wider">Emb<span className="text-orange-500">.</span> CHURCH</span>
+                    </p>
+                    <p className="mt-6 text-slate-600 dark:text-slate-300">
                         {isLoginMode ? 'Acesse seu quadro para continuar sonhando.' : 'Crie sua conta para começar a visualizar.'}
                     </p>
                 </div>

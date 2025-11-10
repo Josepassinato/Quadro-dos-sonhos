@@ -74,7 +74,7 @@ const RemindersModal: React.FC<RemindersModalProps> = ({ onClose, currentUser, b
                     </div>
                     <p>Continue firme em seus propósitos!</p>
                     <div class="footer">
-                      <p>Enviado de Emb. Church Vision Board</p>
+                      <p>Enviado de Realidade Futura</p>
                     </div>
                   </div>
                 </body>
@@ -88,7 +88,7 @@ const RemindersModal: React.FC<RemindersModalProps> = ({ onClose, currentUser, b
                         'Authorization': `Bearer re_QoqZMnLe_D2MQHEWUhAjfDqUjCPi1C6ek`
                     },
                     body: JSON.stringify({
-                        from: 'Emb. Church <onboarding@resend.dev>',
+                        from: 'Realidade Futura <onboarding@resend.dev>',
                         to: [settings.email],
                         subject: `Sua Inspiração Mensal para a Realidade Futura ✨`,
                         html: emailHtml,

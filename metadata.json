@@ -1,5 +1,5 @@
 {
-  "name": "Emb. Church",
+  "name": "Realidade Futura",
   "description": "Uma aplicação web para criar, gerenciar e compartilhar seu quadro de visualização pessoal. Organize seus objetivos com imagens, defina lembretes e mantenha-se motivado.",
   "requestFramePermissions": [
     "camera"
