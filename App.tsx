@@ -1,25 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import BoardEditor from './components/BoardEditor';
 import AuthPage from './components/AuthPage';
+import PublicBoardViewer from './components/PublicBoardViewer';
 import { Board, User } from './types';
 
 const App: React.FC = () => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [board, setBoard] = useState<Board | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [publicBoard, setPublicBoard] = useState<Board | null>(null);
 
     useEffect(() => {
-        try {
-            const savedUserJSON = localStorage.getItem('sessionUser');
-            if (savedUserJSON) {
-                const savedUser = JSON.parse(savedUserJSON) as User;
-                setCurrentUser(savedUser);
+        const handleRouteChange = () => {
+            setIsLoading(true);
+            const hash = window.location.hash;
+
+            if (hash.startsWith('#/public-board/')) {
+                try {
+                    const encodedData = hash.substring('#/public-board/'.length);
+                    const decodedStr = decodeURIComponent(escape(atob(encodedData)));
+                    const boardData = JSON.parse(decodedStr) as Board;
+                    setPublicBoard(boardData);
+                    setCurrentUser(null);
+                    setBoard(null);
+                } catch (error) {
+                    console.error("Falha ao processar link compartilhado:", error);
+                    window.location.hash = ''; // Limpa o hash inválido
+                    setPublicBoard(null);
+                }
+            } else {
+                setPublicBoard(null);
+                try {
+                    const savedUserJSON = localStorage.getItem('sessionUser');
+                    if (savedUserJSON) {
+                        setCurrentUser(JSON.parse(savedUserJSON) as User);
+                    } else {
+                        setCurrentUser(null);
+                    }
+                } catch (error) {
+                    console.error("Falha ao carregar usuário da sessão", error);
+                    localStorage.removeItem('sessionUser');
+                    setCurrentUser(null);
+                }
             }
-        } catch (error) {
-            console.error("Falha ao carregar usuário da sessão", error);
-            localStorage.removeItem('sessionUser');
-        }
-        setIsLoading(false);
+            setIsLoading(false);
+        };
+
+        handleRouteChange();
+        window.addEventListener('hashchange', handleRouteChange);
+        return () => {
+            window.removeEventListener('hashchange', handleRouteChange);
+        };
     }, []);
 
     useEffect(() => {
@@ -65,6 +96,7 @@ const App: React.FC = () => {
     const handleLoginSuccess = (user: User) => {
         localStorage.setItem('sessionUser', JSON.stringify(user));
         setCurrentUser(user);
+        window.location.hash = ''; // Garante que qualquer hash público seja limpo ao fazer login
     };
 
     const handleLogout = () => {
@@ -74,6 +106,10 @@ const App: React.FC = () => {
             setBoard(null);
         }
     };
+
+    if (publicBoard) {
+        return <PublicBoardViewer board={publicBoard} />;
+    }
 
     if (isLoading) {
         return (

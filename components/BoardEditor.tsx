@@ -7,6 +7,36 @@ import { PlusIcon } from './icons/PlusIcon';
 import MotivationTips from './MotivationTips';
 import { THEMES } from '../constants';
 
+// Modal component to view a single item in fullscreen
+interface ViewItemModalProps {
+  item: Item;
+  onClose: () => void;
+}
+
+const ViewItemModal: React.FC<ViewItemModalProps> = ({ item, onClose }) => {
+  return (
+    <div 
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+        onClick={onClose}
+        aria-modal="true"
+        role="dialog"
+    >
+        <button onClick={onClose} className="absolute top-4 right-4 text-white/70 hover:text-white z-50" aria-label="Fechar">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <div className="relative max-w-4xl w-full max-h-[90vh] p-4" onClick={e => e.stopPropagation()}>
+            <figure>
+                <img src={item.imageUrl} alt={item.caption} className="w-full h-auto max-h-[calc(90vh-80px)] object-contain rounded-lg shadow-2xl"/>
+                <figcaption className="mt-4 text-center text-white text-lg font-medium bg-black/30 p-2 rounded-b-lg">{item.caption}</figcaption>
+            </figure>
+        </div>
+    </div>
+  );
+};
+
+
 interface BoardEditorProps {
     initialBoard: Board;
     onLogout: () => void;
@@ -19,6 +49,7 @@ const BoardEditor: React.FC<BoardEditorProps> = ({ initialBoard, onLogout, curre
     const [board, setBoard] = useState<Board>(initialBoard);
     const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
     const [newSectionName, setNewSectionName] = useState('');
+    const [viewingItem, setViewingItem] = useState<Item | null>(null);
 
     useEffect(() => {
         if (currentUser?.email) {
@@ -39,7 +70,7 @@ const BoardEditor: React.FC<BoardEditorProps> = ({ initialBoard, onLogout, curre
         setBoard(prevBoard => {
             const newBoard = { ...prevBoard };
             const section = newBoard.sections.find(s => s.id === sectionId);
-            if (section) {
+            if (section && section.items.length < 3) {
                 section.items.push({ ...item, id: crypto.randomUUID() });
             }
             return newBoard;
@@ -77,6 +108,14 @@ const BoardEditor: React.FC<BoardEditorProps> = ({ initialBoard, onLogout, curre
             });
             return { ...prevBoard, sections: newSections };
         });
+    }, []);
+    
+    const handleViewItem = useCallback((item: Item) => {
+        setViewingItem(item);
+    }, []);
+
+    const handleCloseViewItem = useCallback(() => {
+        setViewingItem(null);
     }, []);
 
     const handleAddSection = (e: React.FormEvent) => {
@@ -121,6 +160,7 @@ const BoardEditor: React.FC<BoardEditorProps> = ({ initialBoard, onLogout, curre
                             onUpdateItem={handleUpdateItem}
                             onRemoveItem={handleRemoveItem}
                             onRemoveSection={handleRemoveSection}
+                            onViewItem={handleViewItem}
                         />
                     ))}
                 </div>
@@ -152,6 +192,10 @@ const BoardEditor: React.FC<BoardEditorProps> = ({ initialBoard, onLogout, curre
                     onClose={() => setEditingSectionId(null)}
                     onAddItem={(item) => handleAddItem(editingSectionId, item)}
                 />
+            )}
+
+            {viewingItem && (
+                <ViewItemModal item={viewingItem} onClose={handleCloseViewItem} />
             )}
         </div>
     );

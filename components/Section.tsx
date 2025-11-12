@@ -12,9 +12,10 @@ interface SectionProps {
     onUpdateItem: (sectionId: string, itemId: string, updatedCaption: string) => void;
     onRemoveItem: (sectionId: string, itemId: string) => void;
     onRemoveSection: (sectionId: string) => void;
+    onViewItem: (item: Item) => void;
 }
 
-const SectionComponent: React.FC<SectionProps> = ({ section, accentColor, onAddItemClick, onUpdateItem, onRemoveItem, onRemoveSection }) => {
+const SectionComponent: React.FC<SectionProps> = ({ section, accentColor, onAddItemClick, onUpdateItem, onRemoveItem, onRemoveSection, onViewItem }) => {
     
     const colorVariants = {
         rose: 'border-rose-400',
@@ -46,15 +47,18 @@ const SectionComponent: React.FC<SectionProps> = ({ section, accentColor, onAddI
                         item={item} 
                         onUpdate={(caption) => onUpdateItem(section.id, item.id, caption)} 
                         onRemove={() => onRemoveItem(section.id, item.id)} 
+                        onView={() => onViewItem(item)}
                     />
                 ))}
-                <button
-                    onClick={onAddItemClick}
-                    className="aspect-w-1 aspect-h-1 group flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50"
-                >
-                    <PlusIcon className="w-10 h-10 text-slate-400 dark:text-slate-500 group-hover:text-indigo-500 transition-colors" />
-                    <span className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 group-hover:text-indigo-500">Adicionar Item</span>
-                </button>
+                {section.items.length < 3 && (
+                    <button
+                        onClick={onAddItemClick}
+                        className="aspect-w-1 aspect-h-1 group flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50"
+                    >
+                        <PlusIcon className="w-10 h-10 text-slate-400 dark:text-slate-500 group-hover:text-indigo-500 transition-colors" />
+                        <span className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 group-hover:text-indigo-500">Adicionar Item</span>
+                    </button>
+                )}
             </div>
         </section>
     );

@@ -1,17 +1,25 @@
 
+
 import React, { useState } from 'react';
 import Modal from './Modal';
 import { CopyIcon } from '../icons/CopyIcon';
 import { CheckIcon } from '../icons/CheckIcon';
+import { Board } from '../../types';
 
 interface ShareModalProps {
-  shareSlug: string;
+  board: Board;
   onClose: () => void;
 }
 
-const ShareModal: React.FC<ShareModalProps> = ({ shareSlug, onClose }) => {
+const ShareModal: React.FC<ShareModalProps> = ({ board, onClose }) => {
     const [copied, setCopied] = useState(false);
-    const shareUrl = `${window.location.origin}/public/${shareSlug}`;
+
+    // Codifica os dados do quadro na URL
+    const boardJSON = JSON.stringify(board);
+    // Lida com possíveis caracteres unicode durante a codificação base64
+    const encodedData = btoa(unescape(encodeURIComponent(boardJSON)));
+    const shareUrl = `${window.location.origin}/#public-board/${encodedData}`;
+
 
     const handleCopy = () => {
         navigator.clipboard.writeText(shareUrl).then(() => {

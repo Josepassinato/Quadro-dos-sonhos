@@ -11,6 +11,7 @@ import { LogoutIcon } from './icons/LogoutIcon';
 import { SaveIcon } from './icons/SaveIcon';
 import { CheckIcon } from './icons/CheckIcon';
 import { ThemeIcon } from './icons/ThemeIcon';
+import { UploadCloudIcon } from './icons/UploadCloudIcon';
 
 interface HeaderProps {
     board: Board;
@@ -28,6 +29,7 @@ const Header: React.FC<HeaderProps> = ({ board, onUpdateBoard, onLogout, current
     const [isSaved, setIsSaved] = useState(false);
     const [isThemeMenuOpen, setThemeMenuOpen] = useState(false);
     const themeMenuRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
      useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -61,21 +63,54 @@ const Header: React.FC<HeaderProps> = ({ board, onUpdateBoard, onLogout, current
     };
     
     const handleSave = () => {
-        if (isSaved) return;
+        try {
+            if (isSaved) return;
 
-        const jsonString = JSON.stringify(board, null, 2);
-        const blob = new Blob([jsonString], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${board.title.replace(/\s+/g, '_').toLowerCase()}_vision_board.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        setIsSaved(true);
-        setTimeout(() => setIsSaved(false), 2000);
+            const jsonString = JSON.stringify(board, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${board.title.replace(/\s+/g, '_').toLowerCase()}_vision_board.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            setIsSaved(true);
+            setTimeout(() => setIsSaved(false), 2000);
+        } catch (error) {
+            console.error("Falha ao exportar o quadro:", error);
+            alert("Ocorreu um erro ao exportar o quadro.");
+        }
+    };
+
+    const handleImportClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const importedBoard = JSON.parse(event.target?.result as string) as Board;
+                if (importedBoard && importedBoard.title && Array.isArray(importedBoard.sections)) {
+                    if (window.confirm('Isto irá substituir o seu quadro atual pelo conteúdo do arquivo. Deseja continuar?')) {
+                        onUpdateBoard({ ...board, ...importedBoard, id: board.id, shareSlug: board.shareSlug });
+                    }
+                } else {
+                    alert('Arquivo de quadro inválido.');
+                }
+            } catch (error) {
+                console.error("Erro ao importar quadro:", error);
+                alert('Falha ao importar o quadro. O arquivo pode estar corrompido ou em formato incorreto.');
+            }
+        };
+        reader.readAsText(file);
+        if(e.target) e.target.value = '';
     };
 
     const handleThemeSelect = (themeId: string) => {
@@ -146,6 +181,21 @@ const Header: React.FC<HeaderProps> = ({ board, onUpdateBoard, onLogout, current
                              <span className="hidden lg:inline">Compartilhar</span>
                         </button>
                          <button 
+                            onClick={handleImportClick} 
+                            className="flex items-center justify-center gap-2 p-2 sm:px-3 sm:py-2 text-sm font-medium text-slate-600 dark:text-slate-300 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+                            title="Importar Quadro"
+                         >
+                            <UploadCloudIcon className="w-5 h-5" />
+                            <span className="hidden md:inline">Importar</span>
+                        </button>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileImport}
+                            accept="application/json"
+                            className="hidden"
+                        />
+                         <button 
                              onClick={handleSave} 
                              disabled={isSaved}
                              className={`flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-white rounded-md transition-all duration-300 ${isSaved ? 'bg-green-500' : 'bg-indigo-600 hover:bg-indigo-700'}`}
@@ -167,7 +217,7 @@ const Header: React.FC<HeaderProps> = ({ board, onUpdateBoard, onLogout, current
             </header>
 
             {isRemindersModalOpen && <RemindersModal board={board} currentUser={currentUser} onClose={() => setRemindersModalOpen(false)} />}
-            {isShareModalOpen && <ShareModal shareSlug={board.shareSlug} onClose={() => setShareModalOpen(false)} />}
+            {isShareModalOpen && <ShareModal board={board} onClose={() => setShareModalOpen(false)} />}
             {isFullscreenModalOpen && <FullscreenModal board={board} onClose={() => setFullscreenModalOpen(false)} />}
         </>
     );
